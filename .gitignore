@@ -1,36 +1,20 @@
-# --- Backend (Rutas ajustadas) ---
-Backendack/HELP.md
-Backend/target/
-Backend/.mvn/
-Backend/bin/
-!Backend/**/src/main/**/target/
-!Backend/**/src/test/**/target/
+# --- Backend ---
+Backend/api/target/
+Backend/api/.mvn/
+Backend/api/bin/
+*.class
 
-# --- Frontend (Previsión para React/Vue/Angular) ---
+# --- Frontend ---
 Frontend/node_modules/
 Frontend/dist/
 Frontend/build/
 Frontend/.env
+Frontend/.DS_Store
 
-# --- Base de Datos ---
-# No subir archivos binarios de datos, solo scripts .sql
-DB/data/
-DB/*.log
-
-### STS ###
-Backend/.apt_generated
-Backend/.classpath
-Backend/.factorypath
-Backend/.project
-Backend/.settings
-Backend/.springBeans
-Backend/.sts4-cache
-
-### IntelliJ IDEA ###
+# --- IDEs ---
 .idea/
-*.iws
-*.iml
-*.ipr
-
-### VS Code ###
 .vscode/
+*.iml
+
+# --- DB ---
+DB/data/

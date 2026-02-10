@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,4 +40,12 @@ public class Lote {
 
     @Column(nullable = false)
     private Boolean activo;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.activo == null || this.estado == null) {
+            this.activo = true;
+            this.estado = true;
+        }
+    }
 }
