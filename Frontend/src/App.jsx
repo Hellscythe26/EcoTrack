@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import CreatableSelect from 'react-select/creatable';
 
 function App() {
   const [productos, setProductos] = useState([]);
-  const [nuevoProducto, setNuevoProducto] = useState({nombre: '', categoria: ''});
-  const [categorias, setCategorias] = useState([])
+  const [nuevoProducto, setNuevoProducto] = useState({nombre: '', categoriaId: ''});
+  const [categorias, setCategorias] = useState([]);
 
   const cargarCategorias = async () => {
     try {
@@ -13,6 +14,32 @@ function App() {
     } catch (err) {
       console.error('Error al cargar categorias:', err);
       setError('No se pudo conectar con el servidor')
+    }
+  };
+
+  const manejarCambioCategoria = async (newValue) => {
+    // Caso 1: El usuario borró la selección (le dio a la "x")
+    if (!newValue) {
+      setNuevoProducto(prev => ({ ...prev, categoriaId: '' }));
+      return;
+    }
+    // Caso 2: El usuario escribió algo nuevo y le dio a "Create..."
+    if (newValue.__isNew__) {
+      try {
+        const res = await axios.post('http://localhost:8080/api/categorias', {
+          nombre: newValue.label.toUpperCase()
+        });
+        const nuevaCat = res.data;
+        setCategorias(prev => [...prev , nuevaCat]); // Actualizamos la lista global
+        setNuevoProducto(prev => ({ ...prev, categoriaId: nuevaCat.id })); // La seleccionamos
+      } catch (err) {
+        console.error("Error al crear la nueva categoría: ", err);
+        alert("No se pudo crear la categoria");
+      }
+    }
+    // Caso 3: El usuario seleccionó una categoría que ya existía
+    else {
+      setNuevoProducto(prev => ({...prev, categoriaId: newValue.value }));
     }
   };
 
@@ -41,19 +68,30 @@ function App() {
 
   const guardarProducto = async (e) => {
     e.preventDefault();
+    if (!nuevoProducto.categoriaId) {
+      alert("Por favor selecciona o crea una categoría primero");
+      return;
+    }
+    const categoriaSeleccionada = categorias.find(c => Number(c.id) === Number(nuevoProducto.categoriaId));
     const payload = {
       nombre: nuevoProducto.nombre,
-      categoria: {
-        id: parseInt(nuevoProducto.categoriaId)
-      }
+      categoria: { id: parseInt(nuevoProducto.categoriaId) }
     };
     try {
-      await axios.post('http://localhost:8080/api/productos', payload);
-      setNuevoProducto({nombre: '', categoria: ''});
-      cargarProductos();
+      const response = await axios.post('http://localhost:8080/api/productos', payload);
+      const productoParaLaLista = {
+        ...response.data,
+        categoria: response.data.categoria?.nombre
+          ? response.data.categoria
+          : { id: nuevoProducto.categoriaId, nombre: categoriaSeleccionada?.nombre }
+      };
+      setProductos(prevProductos => [...prevProductos, productoParaLaLista]);
+      setNuevoProducto({nombre: '', categoriaId: ''})
+      alert('¡Producto guardado exitosamente!')
+      // Limpiar formulario...
     } catch (error) {
-      console.error('Detalle del error:', error.response.data);
-      alert('Error al guardar el producto');
+      console.error('Error al guardar:', error.response?.data);
+      alert('Error al guardar el producto')
     }
   };
 
@@ -71,17 +109,30 @@ function App() {
           onChange={manejarCambio} 
           required 
         />
-        <select
-          name="categoriaId" 
-          value={nuevoProducto.categoriaId}
-          onChange={manejarCambio}
-          required
-        >
-          <option value="">Selecciona una categoria</option>
-          {categorias.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-          ))}
-        </select>
+        <div style={{ width: '300px', display: 'inline-block', marginLeft: '10px', verticalAlign: 'middle', color: 'black' }}>
+          <CreatableSelect
+            isClearable
+            placeholder="Escribe para buscar o crear..."
+            // Transformamos nuestras categorías al formato {value, label} que pide la librería
+            options={categorias.map(cat => ({
+              value: Number(cat.id),
+              label: cat.nombre
+            }))}
+            // Usamos la nueva función que creamos en el paso anterior
+            onChange={manejarCambioCategoria}
+            // Para que el select muestre lo que está seleccionado en el estado
+            value={
+              nuevoProducto.categoriaId
+                ? {
+                  value: Number(nuevoProducto.categoriaId), 
+                  label: categorias.find(c => Number(c.id) === Number(nuevoProducto.categoriaId))?.nombre
+                }
+                : null
+            }
+            // Mensaje que sale cuando vas a crear algo nuevo
+            formatCreateLabel={(inputValue) => `Crear categoría "${inputValue.toUpperCase()}"`}
+          />
+        </div>
         <button type="submit" style={{ marginLeft: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', padding: '5px 15px', cursor: 'pointer' }}>
           Guardar
         </button>
@@ -99,7 +150,7 @@ function App() {
           {productos.map((p) => (
             <tr key={p.id}>
               <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{p.nombre}</td>
-              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{p.categoria ? p.categoria.nombre : 'Sin categoria'}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{p.categoria?.nombre || 'Sin categoria'}</td>
             </tr>
           ))}
         </tbody>

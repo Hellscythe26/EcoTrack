@@ -18,3 +18,7 @@ Frontend/.DS_Store
 
 # --- DB ---
 DB/data/
+
+node_modules/
+.DS_Store
+.env

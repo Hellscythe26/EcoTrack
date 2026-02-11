@@ -22,7 +22,10 @@ public class CategoriaController {
     private CategoriaService categoriaService;
 
     @PostMapping
-    public ResponseEntity<Categoria> crear(@RequestBody Categoria categoria) {
+    public ResponseEntity<?> crear(@RequestBody Categoria categoria) {
+        if (categoria.getNombre() == null || categoria.getNombre().isBlank()) {
+            return ResponseEntity.badRequest().body("El nombre de la categoría no puede estar vacío");
+        }
         categoria.setNombre(categoria.getNombre().toUpperCase());
         Categoria nuevaCategoria = categoriaService.guardar(categoria);
         return ResponseEntity.ok(nuevaCategoria);

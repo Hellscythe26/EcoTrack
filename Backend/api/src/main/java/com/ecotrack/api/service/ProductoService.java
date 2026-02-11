@@ -18,11 +18,13 @@ public class ProductoService {
     @Autowired
     private LoteRepository loteRepository;
 
+    @Transactional
     public Producto guardar(Producto producto) {
         if (productoRepository.existsByNombreIgnoreCaseAndActivoTrue(producto.getNombre())) {
             throw new RuntimeException("Ya existe un producto activo con el nombre: " + producto.getNombre());
         }
-        return productoRepository.save(producto);
+        Producto productoNuevo = productoRepository.save(producto);
+        return productoRepository.findById(productoNuevo.getId()).orElse(productoNuevo);
     }
 
     public List<Producto> listarTodos() {
