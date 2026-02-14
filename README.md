@@ -47,4 +47,4 @@ El sistema utiliza una separación clara de responsabilidades:
 ### Pasos para ejecutar
 1. **Clonar el repositorio:**
    ```bash
-   git clone [https://github.com/Hellscythe26/ecotrack.git](https://github.com/tu-usuario/ecotrack.git)
+   git clone [https://github.com/Hellscythe26/EcoTrack.git](https://github.com/tu-usuario/EcoTrack.git)
