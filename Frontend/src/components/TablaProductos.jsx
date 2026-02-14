@@ -29,7 +29,7 @@ const TablaProductos = ({ productos }) => {
                 </span>
               </td>
 
-              {/* Stock (Viene del ProductoDTO) */}
+              {/* Stock */}
               <td className="p-4">
                 <div className="flex items-center gap-2">
                   <span className={`text-base font-extrabold ${p.stock <= 5 ? 'text-red-600' : 'text-gray-700'}`}>

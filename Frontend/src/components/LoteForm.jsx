@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Select from 'react-select'; // Usamos react-select para buscar productos fácilmente
+import Select from 'react-select';
 
 const LoteForm = ({ productos, guardarLote }) => {
     const [nuevoLote, setNuevoLote] = useState({
@@ -10,18 +10,14 @@ const LoteForm = ({ productos, guardarLote }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        // Objeto limpio según tu estructura de Back
         const datosParaEnviar = {
             producto: { id: parseInt(nuevoLote.productoId) },
             cantidad: parseInt(nuevoLote.cantidad),
-            fechaVencimiento: nuevoLote.fechaVencimiento // Se le añade la hora en el Hook
+            fechaVencimiento: nuevoLote.fechaVencimiento 
         };
-
         guardarLote(datosParaEnviar);
         setNuevoLote({ cantidad: '', fechaVencimiento: '', productoId: '' });
     };
-
     return (
         <form onSubmit={handleSubmit} className="space-y-4 text-gray-700">
             {/* Selector de Producto */}
@@ -33,7 +29,6 @@ const LoteForm = ({ productos, guardarLote }) => {
                     onChange={(opt) => setNuevoLote({ ...nuevoLote, productoId: opt.value })}
                 />
             </div>
-
             {/* Solo Cantidad y Fecha */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -57,7 +52,6 @@ const LoteForm = ({ productos, guardarLote }) => {
                     />
                 </div>
             </div>
-
             <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition-all">
                 Registrar Entrada
             </button>
