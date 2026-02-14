@@ -44,7 +44,6 @@ El sistema utiliza una separación clara de responsabilidades:
 * Node.js 18+
 * MySQL Server
 
-### Pasos para ejecutar
-1. **Clonar el repositorio:**
+### Clonar el repositorio:
    ```bash
    git clone [https://github.com/Hellscythe26/EcoTrack.git](https://github.com/tu-usuario/EcoTrack.git)
