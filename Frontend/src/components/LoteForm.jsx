@@ -8,28 +8,30 @@ const LoteForm = ({ productos, guardarLote }) => {
         productoId: ''
     });
 
+    const opcionesProductos = productos.map(p => ({ value: p.id, label: p.nombre }));
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const datosParaEnviar = {
             producto: { id: parseInt(nuevoLote.productoId) },
             cantidad: parseInt(nuevoLote.cantidad),
-            fechaVencimiento: nuevoLote.fechaVencimiento 
+            fechaVencimiento: nuevoLote.fechaVencimiento
         };
         guardarLote(datosParaEnviar);
         setNuevoLote({ cantidad: '', fechaVencimiento: '', productoId: '' });
     };
     return (
         <form onSubmit={handleSubmit} className="space-y-4 text-gray-700">
-            {/* Selector de Producto */}
             <div>
                 <label className="block text-sm font-semibold mb-1">Producto</label>
                 <Select
-                    options={productos.map(p => ({ value: p.id, label: p.nombre }))}
+                    options={opcionesProductos}
                     placeholder="Selecciona un producto..."
-                    onChange={(opt) => setNuevoLote({ ...nuevoLote, productoId: opt.value })}
+                    value={opcionesProductos.find(opt => opt.value === nuevoLote.productoId) || null}
+                    onChange={(opt) => setNuevoLote({ ...nuevoLote, productoId: opt ? opt.value : '' })}
+                    isClearable
                 />
             </div>
-            {/* Solo Cantidad y Fecha */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-semibold mb-1">Cantidad</label>

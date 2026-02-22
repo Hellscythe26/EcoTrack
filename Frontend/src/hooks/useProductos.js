@@ -12,8 +12,8 @@ export const useProductos = () => {
   const [nuevoProducto, setNuevoProducto] = useState({ nombre: '', categoriaId: '' });
   const [mostrarStock, setMostrarStock] = useState(true);
   const [alertas, setAlertas] = useState([]);
+  const [todosLosLotes, setTodosLosLotes] = useState([]);
 
-  // --- TODA LA LÓGICA QUE TENÍAS EN APP.JSX SE MUEVE AQUÍ ---
   const cargarDatosIniciales = async () => {
     try {
       const [dataProductos, dataCategorias, dataLotes, dataAlertas] = await Promise.all([
@@ -31,8 +31,19 @@ export const useProductos = () => {
     }
   };
 
+  const cargarTodosLosLotes = async () => {
+    try {
+      const respuesta = await fetch("http://localhost:8080/api/lotes");
+      const datos = await respuesta.json();
+      setTodosLosLotes(datos);
+    } catch (error) {
+      console.error("Error al cargar todos los lotes:", error);
+    }
+  };
+
   useEffect(() => {
     cargarDatosIniciales();
+    cargarTodosLosLotes();
   }, []);
 
   useEffect(() => {
@@ -62,7 +73,7 @@ export const useProductos = () => {
     };
     try {
       await productoService.saveProducto(payload);
-      await cargarDatosIniciales(); // Recargamos para ver el nuevo
+      await cargarDatosIniciales();
       setNuevoProducto({ nombre: '', categoriaId: '' });
       navigate('/inventario');
     } catch (error) {
@@ -76,15 +87,10 @@ export const useProductos = () => {
 
   const guardarLote = async (datosFormulario) => {
     try {
-      // Transformamos la fecha para añadirle la parte del tiempo T00:00:00
-      // Si el input date te da "2026-03-15", esto lo convierte en "2026-03-15T00:00:00"
       const payload = {
         ...datosFormulario,
         fechaVencimiento: `${datosFormulario.fechaVencimiento}T00:00:00`
       };
-
-      console.log("Enviando al back:", payload); // Para que verifiques en consola
-
       await loteService.saveLote(payload);
       await cargarDatosIniciales();
       alert("¡Lote registrado correctamente!");
@@ -95,14 +101,47 @@ export const useProductos = () => {
   };
 
   const productosBajoStock = productos.filter(p => {
-    // Sumamos las cantidades de todos los lotes de este producto
     const stockTotal = lotes
       .filter(l => l.producto.id === p.id)
       .reduce((acc, current) => acc + current.cantidad, 0);
-    return stockTotal < 10; // Umbral de ejemplo
+    return stockTotal < 10;
   }).length;
 
-  // EXPORTAMOS TODO LO QUE LOS COMPONENTES NECESITEN
+  const eliminarProducto = async (id) => {
+    if (!window.confirm("¿Estás seguro?")) return;
+    try {
+      const respuesta = await fetch(`http://localhost:8080/api/productos/${id}`, {
+        method: 'DELETE',
+      });
+      if (respuesta.ok) {
+        setProductos(prevProductos =>
+          prevProductos.filter(p => p.id !== id)
+        );
+        setAlertas(prevAlertas =>
+          prevAlertas.filter(alerta => alerta.producto.id !== id)
+        );
+        alert("Producto y sus lotes eliminados correctamente");
+      }
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+    }
+  };
+
+  const eliminarLote = async (loteId) => {
+    if (!window.confirm("¿Deseas eliminar este lote de forma permanente?")) return;
+    try {
+      const respuesta = await fetch(`http://localhost:8080/api/lotes/${loteId}`, {
+        method: 'DELETE',
+      });
+      if (respuesta.ok) {
+        setAlertas(prev => prev.filter(l => l.id !== loteId));
+        cargarDatosIniciales();
+      }
+    } catch (error) {
+      console.error("Error al eliminar el lote:", error);
+    }
+  };
+
   return {
     productos,
     categorias,
@@ -114,6 +153,10 @@ export const useProductos = () => {
     lotes,
     guardarLote,
     productosBajoStock,
-    alertas
+    alertas,
+    todosLosLotes,
+    cargarTodosLosLotes,
+    eliminarProducto,
+    eliminarLote
   };
 };

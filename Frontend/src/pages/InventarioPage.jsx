@@ -1,34 +1,32 @@
-import { Link, useSearchParams } from "react-router-dom"; // Unión de imports
+import { Link, useSearchParams } from "react-router-dom";
 import ProductoForm from "../components/ProductoForm";
 import TablaProductos from "../components/TablaProductos";
 import LoteForm from '../components/LoteForm';
-import { useProductos } from "../hooks/useProductos";
 
 const InventarioPage = ({
-    nuevoProducto, manejarCambio, categorias, manejarCambioCategoria, guardarProducto, guardarLote
+    productos, alertas, cargando, onEliminarProducto, onEliminarLote, nuevoProducto, manejarCambio, categorias,
+    manejarCambioCategoria, todosLosLotes, guardarProducto, guardarLote
 }) => {
-    // Obtenemos los datos del hook
-    const { productos, alertas, cargando } = useProductos();
     const [searchParams] = useSearchParams();
-
     const filtro = searchParams.get('filtro');
-
     let productosFiltrados = productos;
 
     if (filtro === 'bajo') {
         productosFiltrados = productos.filter(p => p.stockTotal <= 5);
-    } else if (filtro === 'vencimiento') {
-        // Extraemos los IDs únicos de productos que tienen alertas de vencimiento
-        const idsConVencimiento = [...new Set(alertas.map(a => a.producto.id))];
-        productosFiltrados = productos.filter(p => idsConVencimiento.includes(p.id));
     }
-
+    const lotesAMostrar = (filtro === 'vencimiento' ? alertas : todosLosLotes) || [];
     if (cargando) return (
         <div className="p-10 text-center font-bold text-blue-600 animate-pulse">
             Cargando inventario...
         </div>
     );
 
+    const esProximoAVencer = (fechaVencimiento) => {
+        const hoy = new Date();
+        const fechaLote = new Date(fechaVencimiento);
+        const diferenciaDias = (fechaLote - hoy) / (1000 * 60 * 60 * 24);
+        return diferenciaDias >= 0 && diferenciaDias <= 7;
+    };
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
@@ -42,8 +40,6 @@ const InventarioPage = ({
                     ← Volver al Dashboard
                 </Link>
             </div>
-
-            {/* Formularios */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <div className="flex items-center gap-2 mb-6 text-green-600">
@@ -65,12 +61,10 @@ const InventarioPage = ({
                         <h3 className="text-lg font-bold text-gray-800">Registrar Entrada (Lote)</h3>
                     </div>
                     <LoteForm
-                        productos={productos} // Lista completa para el select
+                        productos={productos}
                         guardarLote={guardarLote}
                     />
                 </section>
-
-                {/* Tabla con la lista filtrada */}
                 <section className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                     <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
                         <h3 className="font-bold text-gray-700 uppercase text-sm tracking-widest">
@@ -82,9 +76,7 @@ const InventarioPage = ({
                             </Link>
                         )}
                     </div>
-
-                    {filtro === 'vencimiento' ? (
-                        /* TABLA DE LOTES (Solo se ve cuando activas la alerta) */
+                    {(filtro === 'vencimiento' || filtro === 'lotes') ? (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
@@ -93,10 +85,11 @@ const InventarioPage = ({
                                         <th className="p-4 text-xs font-bold text-orange-700 uppercase">Cantidad</th>
                                         <th className="p-4 text-xs font-bold text-orange-700 uppercase">Fecha Vencimiento</th>
                                         <th className="p-4 text-xs font-bold text-orange-700 uppercase text-right">Estado</th>
+                                        <th className="p-4 text-xs font-bold text-orange-700 uppercase text-center">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {alertas.map((lote) => (
+                                    {lotesAMostrar.map((lote) => (
                                         <tr key={lote.id} className="border-b border-gray-50 hover:bg-orange-50/50 transition-colors">
                                             <td className="p-4">
                                                 <div className="font-bold text-gray-800">{lote.producto?.nombre}</div>
@@ -112,21 +105,38 @@ const InventarioPage = ({
                                                 </div>
                                             </td>
                                             <td className="p-4 text-right">
-                                                <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded text-[10px] font-black uppercase animate-pulse">
-                                                    Próximo a vencer
-                                                </span>
+                                                {esProximoAVencer(lote.fechaVencimiento) ? (
+                                                    <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded text-[10px] font-black uppercase animate-pulse">
+                                                        Próximo a vencer
+                                                    </span>
+                                                ) : (
+                                                    <span className="px-2 py-1 bg-green-100 text-green-600 rounded text-[10px] font-black uppercase">
+                                                        En Stock
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <button
+                                                    onClick={() => onEliminarLote(lote.id)}
+                                                    className="text-red-500 hover:bg-red-100 p-2 rounded-full transition-all"
+                                                    title="Eliminar lote"
+                                                >
+                                                    🗑️
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
-                            {alertas.length === 0 && (
+                            {lotesAMostrar.length === 0 && (
                                 <div className="p-10 text-center text-gray-400 italic">No hay lotes en riesgo.</div>
                             )}
                         </div>
                     ) : (
-                        /* TABLA DE PRODUCTOS (La de siempre) */
-                        <TablaProductos productos={productosFiltrados} />
+                        <TablaProductos
+                            productos={productosFiltrados}
+                            onEliminar={onEliminarProducto}
+                        />
                     )}
                 </section>
             </div>

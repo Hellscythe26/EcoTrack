@@ -30,7 +30,6 @@ const ProductoForm = ({ nuevoProducto, manejarCambio, categorias, manejarCambioC
                 label: categorias.find(c => Number(c.id) === Number(nuevoProducto.categoriaId))?.nombre
               } : null}
               formatCreateLabel={(val) => `Crear "${val.toUpperCase()}"`}
-              // Estilo para que combine con Tailwind
               styles={{
                 control: (base) => ({
                   ...base,

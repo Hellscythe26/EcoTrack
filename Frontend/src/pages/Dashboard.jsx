@@ -5,7 +5,6 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
     const navigate = useNavigate();
     return (
         <>
-            {/*BANNER PRINCIPAL*/}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Gestión de inventario</h1>
@@ -15,7 +14,6 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
                     Ir al Inventario
                 </Link>
             </div>
-            {/*GRID DE ESTADISTICAS*/}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
                     <div className="p-3 bg-blue-100 rounded-lg text-blue-600 text-2xl">📦</div>
@@ -24,7 +22,6 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
                         <h4 className="text-2xl font-bold text-gray-900">{totalProductos}</h4>
                     </div>
                 </div>
-
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
                     <div className="p-3 bg-purple-100 rounded-lg text-purple-600 text-2xl">🏷️</div>
                     <div>
@@ -32,7 +29,6 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
                         <h4 className="text-2xl font-bold text-gray-900">{totalCategorias}</h4>
                     </div>
                 </div>
-
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
                     <div className="p-3 bg-orange-100 rounded-lg text-orange-600 text-2xl">⚠️</div>
                     <div>
@@ -40,7 +36,6 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
                         <h4 className="text-2xl font-bold text-gray-900">{alertas.length}</h4>
                     </div>
                 </div>
-
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
                     <div className="p-3 bg-red-100 rounded-lg text-red-600 text-2xl">📉</div>
                     <div>
@@ -49,9 +44,7 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
                     </div>
                 </div>
             </div>
-            {/*SECCIÓN DE ACCIONES Y ALERTAS*/}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                {/* Tarjeta de Acciones Rápidas */}
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
                     <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                         ⚡ Acciones Rápidas
@@ -69,9 +62,12 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
                             <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">⏰</span>
                             <span className="text-sm font-semibold">Vencimientos</span>
                         </Link>
+                            <Link to="/inventario?filtro=lotes" className="flex flex-col items-center justify-center p-4 rounded-xl border border-purple-100 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-all group">
+                                <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">🚚</span>
+                                <span className="text-sm font-semibold">Ver Lotes</span>
+                            </Link>
                     </div>
                 </div>
-                {/* Tarjeta Dinámica */}
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center min-h-[250px] relative overflow-hidden">
                     {mostrarStock ? (
                         <div key="stock" className="animate-in fade-in slide-in-from-right-4 duration-700 text-center p-4 rounded-xl hover:bg-red-50 transition-colors">
@@ -80,7 +76,6 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
                             <p className="text-gray-500 text-sm mb-4 italic">
                                 {productosBajoStock} {productosBajoStock === 1 ? 'producto está' : 'productos están'} por agotarse
                             </p>
-                            {/* Este link añade ?filtro=bajo a la URL */}
                             <Link
                                 to="/inventario?filtro=bajo"
                                 className="text-red-600 font-bold text-sm hover:underline p-2"
@@ -92,7 +87,6 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
                         <div key="vence" className="animate-in fade-in slide-in-from-right-4 duration-700 text-center">
                             <span className="text-4xl mb-4 block">⏰</span>
                             <h4 className="text-lg font-bold text-gray-800">Próximos Vencimientos</h4>
-
                             {alertas.length > 0 ? (
                                 <>
                                     <p className="text-orange-600 text-xl font-black mb-1">
@@ -107,8 +101,6 @@ const Dashboard = ({ totalProductos, totalCategorias, proximosAVencer, productos
                                     Todo al día. No hay vencimientos próximos.
                                 </p>
                             )}
-
-                            {/* Cambiamos el onClick por un Link hacia el inventario filtrado */}
                             <Link
                                 to="/inventario?filtro=vencimiento"
                                 className="text-orange-600 font-bold text-sm hover:underline"

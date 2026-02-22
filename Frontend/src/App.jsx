@@ -5,8 +5,19 @@ import { useProductos } from './hooks/useProductos';
 
 function App() {
   const {
-    productos, categorias, nuevoProducto, mostrarStock,
-    manejarCambio, manejarCambioCategoria, guardarProducto, guardarLote, productosBajoStock, alertas
+    productos,
+    categorias,
+    nuevoProducto,
+    mostrarStock,
+    manejarCambio,
+    manejarCambioCategoria,
+    guardarProducto,
+    guardarLote,
+    productosBajoStock,
+    alertas,
+    todosLosLotes,
+    eliminarProducto,
+    eliminarLote
   } = useProductos();
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-sans">
@@ -24,12 +35,16 @@ function App() {
           <Route path="/inventario" element={
             <InventarioPage
               productos={productos}
+              alertas={alertas}
               categorias={categorias}
               nuevoProducto={nuevoProducto}
               manejarCambio={manejarCambio}
               manejarCambioCategoria={manejarCambioCategoria}
               guardarProducto={guardarProducto}
               guardarLote={guardarLote}
+              todosLosLotes={todosLosLotes}
+              onEliminarProducto={eliminarProducto}
+              onEliminarLote={eliminarLote}
             />
           } />
         </Routes>
